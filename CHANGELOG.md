@@ -4,6 +4,7 @@
 
 - Brand images: Home Assistant (2026.3 and newer) shows the integration's own icon and logo.
 - Links to the documentation and issue tracker, for HACS.
+- Every result is an update: two results in the same millisecond used to share a `time`, so the second changed nothing. Each result's `time` is now always later than the last.
 
 ## 1.0.0
 

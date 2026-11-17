@@ -9,7 +9,8 @@ state) and, for each tool result, shows:
 - display: whether the result has something a screen shows: pictures, videos, a forecast or a quote. The rules are
   Kiosk Satellite's for its result panels.
 - words: what was said to start the turn, so a speaker can tell its own turn from another's.
-- time: when the result came back, so every result is an update, even the same one twice.
+- time: when the result came back, always later than the last one's (by a millisecond if two come back at once),
+  so every result is an update, even the same one twice.
 
 words and time are left out of history.
 """
@@ -17,6 +18,7 @@ words and time are left out of history.
 from __future__ import annotations
 
 import asyncio
+from datetime import UTC, datetime
 from typing import Any
 
 import slugify as unicode_slug
@@ -84,6 +86,8 @@ class ToolCallSensor(SensorEntity):
         # Tool name to API name, per merged API, as looking it up builds each API's tools.
         self._names: dict[tuple[str, str], str] = {}
         self._order = asyncio.Lock()
+        # The last time given, in milliseconds: each result's is later, even two in the same millisecond.
+        self._last_ms = 0
 
     async def async_added_to_hass(self) -> None:
         """Follow every chat log."""
@@ -120,7 +124,7 @@ class ToolCallSensor(SensorEntity):
             if data is None:
                 data = _get(_get(content, "result") or {}, "data")
             words = self._words.get(conversation_id, "")
-            time = dt_util.utcnow().isoformat(timespec="milliseconds")
+            time = self._next_time()
             # The turn's chat log, for the APIs its tools came from. While the turn runs it's the current one
             # (Home Assistant only stores it once the turn ends).
             chat_log = current_chat_log.get()
@@ -131,6 +135,12 @@ class ToolCallSensor(SensorEntity):
                 self._publish(apis, tool, has_display(tool, data), words, time),
                 eager_start=True,
             )
+
+    def _next_time(self) -> str:
+        """Now, to the millisecond, but always after the last result's time, so every result is an update."""
+        ms = max(int(dt_util.utcnow().timestamp() * 1000), self._last_ms + 1)
+        self._last_ms = ms
+        return datetime.fromtimestamp(ms / 1000, UTC).isoformat(timespec="milliseconds")
 
     async def _publish(self, instance: Any, tool: str, display: bool, words: str, time: str) -> None:
         # Results are published in the order they came back, even when an API name takes a moment to look up.

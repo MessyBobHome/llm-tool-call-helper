@@ -180,13 +180,15 @@ async def test_every_result_updates(hass, apis):
     assert seen[0].attributes["time"] != seen[1].attributes["time"]
 
 
-async def test_two_tools_in_order(hass, apis):
+async def test_two_tools_both_published(hass, apis):
     seen = changes(hass)
     agent = ["assist", *[a.id for a in apis.values()]]
     await turn(hass, "weather and a picture", agent,
                [(await tool_named(hass, agent, "get_weather_forecast"), {"range": "today"}),
                 (await tool_named(hass, agent, "search_images"), {"query": "rain"})])
-    assert [s.state for s in seen] == ["Voice Satellite: Weather Forecast", "Voice Satellite: Image Search"]
+    # The chat log runs a turn's tools side by side: each result is published, in the order they finish.
+    assert sorted(s.state for s in seen) == ["Voice Satellite: Image Search", "Voice Satellite: Weather Forecast"]
+    assert seen[0].attributes["time"] < seen[1].attributes["time"]
 
 
 async def test_follow_up_turn(hass, apis):
@@ -227,3 +229,21 @@ async def test_one_entry_only(hass):
     assert result["type"] == "create_entry"
     again = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "user"})
     assert again["type"] == "abort" and again["reason"] == "single_instance_allowed"
+
+
+async def test_same_millisecond(hass, apis, monkeypatch):
+    """Two results in the same millisecond still get different times, a millisecond apart, so both are updates."""
+    from datetime import datetime, UTC
+    from homeassistant.util import dt as dt_util
+    frozen = datetime(2026, 11, 17, 6, 49, 12, 542000, tzinfo=UTC)
+    monkeypatch.setattr(dt_util, "utcnow", lambda: frozen)
+    seen = changes(hass)
+    agent = ["assist", *[a.id for a in apis.values()]]
+    await turn(hass, "weather and a picture", agent,
+               [(await tool_named(hass, agent, "get_weather_forecast"), {"range": "today"}),
+                (await tool_named(hass, agent, "search_images"), {"query": "rain"})])
+    await turn(hass, "weather and a picture", agent,
+               [(await tool_named(hass, agent, "get_weather_forecast"), {"range": "today"})])
+    # The chat log runs a turn's tools side by side, so they may finish in either order.
+    assert sorted(s.attributes["time"] for s in seen) == [
+        "2026-11-17T06:49:12.542+00:00", "2026-11-17T06:49:12.543+00:00", "2026-11-17T06:49:12.544+00:00"]

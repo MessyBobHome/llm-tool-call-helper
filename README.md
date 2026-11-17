@@ -15,7 +15,7 @@ Home Assistant adds every tool call and result to a conversation's log as it hap
 | State | `Voice Satellite: Image Search` | The name of the LLM API the tool belongs to, as your conversation agent's settings list it. Home Assistant's own tools show as its built-in API (`Assist`, or `Device control` from Home Assistant 2026.11). | Yes |
 | `display` | `true` | Whether the result has something a screen would show: pictures, videos, a weather forecast or a stock quote. It follows the rules Kiosk Satellite uses for its result panels, so a failed search or a Wikipedia article without a picture is `false`. | Yes |
 | `words` | `What does a pangolin look like?` | What was said to start that turn, so a speaker can tell its own turn from another's. | No |
-| `time` | `2026-11-11T18:42:07.315+00:00` | When the result came back. It changes every time, so every result is an update, even the same tool with the same result twice. | No |
+| `time` | `2026-11-11T18:42:07.315+00:00` | When the result came back, always at least a millisecond after the previous result's, so every result is an update, even the same tool with the same result twice. | No |
 
 - It updates once for each tool result, not when the tool is called, and not for turns that use no tools.
 - It works with any LLM API, from any integration, including ones installed later. Nothing is hard-coded: it asks Home Assistant which API each tool came from.
