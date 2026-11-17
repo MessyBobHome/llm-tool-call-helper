@@ -1,6 +1,9 @@
 {
   "domain": "llm_tool_call_helper",
   "name": "LLM Tool Call Helper",
+  "categories": [
+    "ai_voice.voice_assistants"
+  ],
   "codeowners": [
     "@MessyBobHome"
   ],
