@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7C6CF2"/>
+      <stop offset="1" stop-color="#3D8BFD"/>
+    </linearGradient>
+    <mask id="jaw">
+      <rect width="256" height="256" fill="#fff"/>
+      <rect x="114" y="30" width="28" height="46" rx="4" fill="#000"/>
+    </mask>
+  </defs>
+  <!-- Speech bubble: a conversation -->
+  <path d="M60 20 H196 A44 44 0 0 1 240 64 V146 A44 44 0 0 1 196 190 H112 L62 236 V190 H60 A44 44 0 0 1 16 146 V64 A44 44 0 0 1 60 20 Z" fill="url(#g)"/>
+  <!-- Wrench: a tool being called -->
+  <g transform="rotate(45 128 105)" fill="#fff">
+    <g mask="url(#jaw)"><circle cx="128" cy="66" r="34"/></g>
+    <rect x="114" y="80" width="28" height="94" rx="14"/>
+  </g>
+</svg>

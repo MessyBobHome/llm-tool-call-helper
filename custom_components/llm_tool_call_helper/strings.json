@@ -1,0 +1,13 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "LLM Tool Call Helper",
+        "description": "Adds sensor.llm_tool_call, which names the LLM API of each tool an AI conversation agent calls, as soon as the tool returns."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "LLM Tool Call Helper is already set up."
+    }
+  }
+}
